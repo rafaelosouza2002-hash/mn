@@ -132,8 +132,8 @@ class MainActivity : AppCompatActivity() {
             val adminComponent = ComponentName(this, AdminReceiver::class.java)
 
             if (dpm.isDeviceOwnerApp(packageName)) {
-                // Whitelist package for LockTask (pins silently with ZERO unpin option)
-                dpm.setLockTaskPackages(adminComponent, arrayOf(packageName))
+                // Whitelist packages for LockTask (our app + Settings for Bluetooth pairing)
+                dpm.setLockTaskPackages(adminComponent, arrayOf(packageName, "com.android.settings"))
                 // Disable status bar expansion completely
                 dpm.setStatusBarDisabled(adminComponent, true)
                 // Disable lock screen/keyguard
