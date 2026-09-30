@@ -1,0 +1,755 @@
+<!DOCTYPE html><html lang="pt-BR" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Câmara de Refúgio - Console Operacional de Sobrevivência</title>
+<!-- Local Offline Styles & Fonts -->
+<link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="style.css">
+<style data-purpose="base-typography">
+    body {
+      font-family: 'Chakra+Petch', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .font-mono-tech {
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .font-chivo {
+      font-family: 'Chivo', sans-serif;
+    }
+  </style>
+<style data-purpose="industrial-textures">
+    /* Deep subterranean rock & damp mine background */
+    .mine-bg {
+      background-color: #0c0d10;
+      background-image: 
+        radial-gradient(circle at 18% 22%, rgba(255, 175, 55, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 82% 78%, rgba(20, 24, 32, 0.95) 0%, transparent 60%),
+        radial-gradient(circle at 50% 50%, #171a21 0%, #090a0d 100%);
+    }
+
+    /* Heavy Powder-coated Safety Orange Enclosure */
+    .enclosure-body {
+      background: linear-gradient(148deg, #ff6a1a 0%, #eb4e03 42%, #c93b00 100%);
+      box-shadow: 
+        inset 0 3px 6px rgba(255, 255, 255, 0.45),
+        inset 0 -6px 12px rgba(0, 0, 0, 0.55),
+        inset 3px 0 6px rgba(255, 255, 255, 0.2),
+        inset -4px 0 10px rgba(0, 0, 0, 0.6),
+        0 22px 50px rgba(0, 0, 0, 0.95),
+        0 6px 15px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Industrial Bolt Head */
+    .hex-bolt {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #94a3b8 0%, #475569 55%, #1e293b 100%);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.8), inset 0 1px 1px rgba(255,255,255,0.6);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hex-bolt::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      background: #0f172a;
+      clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.9);
+    }
+
+    /* Brushed Aluminum Speaker Plate */
+    .speaker-grille {
+      background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 50%, #6b7280 100%);
+      box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.8),
+        inset 0 -2px 5px rgba(0,0,0,0.5),
+        0 6px 12px rgba(0,0,0,0.6);
+    }
+    .speaker-slot {
+      background: #111827;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.95), 0 1px 1px rgba(255,255,255,0.3);
+      border-radius: 9999px;
+    }
+
+    /* 3D Round Pushbuttons */
+    .tactile-btn {
+      transition: transform 0.08s ease, filter 0.1s ease, box-shadow 0.08s ease;
+    }
+    .tactile-btn:active {
+      transform: translateY(2px) scale(0.98);
+    }
+
+    /* Prominent Canary Yellow Pushbutton (Top Right) */
+    .canary-button {
+      background: radial-gradient(circle at 38% 32%, #fff04b 0%, #ffd600 48%, #cfa900 100%);
+      box-shadow: 
+        inset 0 4px 6px rgba(255,255,255,0.8),
+        inset 0 -6px 10px rgba(133, 105, 0, 0.7),
+        0 10px 18px rgba(0,0,0,0.65),
+        0 3px 6px rgba(0,0,0,0.4);
+    }
+    .canary-button:active {
+      transform: translateY(4px) scale(0.98);
+      box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.6),
+        inset 0 -2px 6px rgba(133, 105, 0, 0.9),
+        0 4px 8px rgba(0,0,0,0.7);
+    }
+
+    /* Beveled Collar for the Yellow Button */
+    .canary-collar {
+      background: linear-gradient(145deg, #333945, #11151c);
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 5px 12px rgba(0,0,0,0.8);
+    }
+
+    /* Red Mushroom Emergency Button with Yellow Ring */
+    .mushroom-cap {
+      background: radial-gradient(circle at 35% 30%, #ff5252 0%, #dc2626 50%, #991b1b 100%);
+      box-shadow: 
+        inset 0 5px 8px rgba(255,255,255,0.6),
+        inset 0 -8px 14px rgba(69, 10, 10, 0.8),
+        0 12px 20px rgba(0,0,0,0.7),
+        0 3px 5px rgba(0,0,0,0.5);
+    }
+    .mushroom-cap:active {
+      transform: translateY(5px) scale(0.96);
+      box-shadow: 
+        inset 0 2px 5px rgba(255,255,255,0.4),
+        inset 0 -4px 8px rgba(69, 10, 10, 0.9),
+        0 4px 8px rgba(0,0,0,0.8);
+    }
+
+    /* Emergency Beacon Glow / Pulse */
+    @keyframes beaconPulse {
+      0%, 100% {
+        box-shadow: 0 0 22px 5px rgba(239, 68, 68, 0.75), inset 0 5px 8px rgba(255,255,255,0.6), inset 0 -8px 14px rgba(69, 10, 10, 0.8);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 40px 14px rgba(239, 68, 68, 0.95), inset 0 6px 10px rgba(255,255,255,0.9), inset 0 -8px 14px rgba(69, 10, 10, 0.8);
+        transform: scale(1.035);
+      }
+    }
+    .emergency-beacon-pulse {
+      animation: beaconPulse 1.4s infinite ease-in-out;
+    }
+
+    /* Realistic LED Glow Classes */
+    .led-glow-green {
+      box-shadow: 0 0 10px 3px rgba(34, 197, 94, 0.85), inset 0 1px 2px rgba(255,255,255,0.9);
+    }
+    .led-glow-amber {
+      box-shadow: 0 0 12px 4px rgba(245, 158, 11, 0.9), inset 0 1px 2px rgba(255,255,255,0.9);
+      animation: pulseAmber 1.4s infinite ease-in-out;
+    }
+
+    @keyframes pulseAmber {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.96); }
+    }
+
+    /* Warning Hazard Stripes */
+    .hazard-stripes {
+      background: repeating-linear-gradient(
+        -45deg,
+        #f59e0b,
+        #f59e0b 14px,
+        #18181b 14px,
+        #18181b 28px
+      );
+    }
+
+    /* Humanized Ergonomic Silicone Tactile Buttons */
+    .pill-btn-base {
+      position: relative;
+      border-radius: 9999px;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      user-select: none;
+      outline: none;
+    }
+
+    .pill-btn-dark {
+      background: linear-gradient(180deg, #2d333e 0%, #1c2028 52%, #12151b 100%);
+      box-shadow: 
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.2),
+        inset 0 -2.5px 4px rgba(0, 0, 0, 0.8),
+        0 7px 16px rgba(0, 0, 0, 0.65),
+        0 2px 4px rgba(0, 0, 0, 0.4);
+      border: 1.5px solid rgba(148, 163, 184, 0.25);
+    }
+    .pill-btn-dark:hover {
+      background: linear-gradient(180deg, #373e4b 0%, #242a34 52%, #171b22 100%);
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.3),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.8),
+        0 9px 20px rgba(0, 0, 0, 0.7),
+        0 0 14px rgba(245, 158, 11, 0.2);
+    }
+    .pill-btn-dark:active {
+      transform: translateY(2px) scale(0.985);
+      box-shadow: 
+        inset 0 3px 6px rgba(0, 0, 0, 0.9),
+        0 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .pill-btn-accent {
+      background: linear-gradient(180deg, #ffa434 0%, #f5840d 48%, #d55c00 100%);
+      box-shadow: 
+        inset 0 2px 1.5px rgba(255, 255, 255, 0.7),
+        inset 0 -3px 5px rgba(110, 38, 0, 0.75),
+        0 8px 22px rgba(195, 65, 0, 0.5),
+        0 3px 6px rgba(0, 0, 0, 0.5);
+      border: 1.5px solid rgba(254, 215, 170, 0.85);
+    }
+    .pill-btn-accent:hover {
+      background: linear-gradient(180deg, #ffaf48 0%, #fb8f1e 48%, #e06500 100%);
+      box-shadow: 
+        inset 0 2px 2px rgba(255, 255, 255, 0.85),
+        inset 0 -3px 5px rgba(110, 38, 0, 0.7),
+        0 10px 26px rgba(217, 98, 0, 0.65),
+        0 0 18px rgba(245, 158, 11, 0.45);
+    }
+    .pill-btn-accent:active {
+      transform: translateY(2px) scale(0.985);
+      box-shadow: 
+        inset 0 3px 7px rgba(120, 30, 0, 0.85),
+        0 3px 6px rgba(0, 0, 0, 0.45);
+    }
+
+    .thumb-dish {
+      background: radial-gradient(ellipse at 50% 35%, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.25) 75%, rgba(0, 0, 0, 0.5) 100%);
+      border-radius: 9999px;
+    }
+    .thumb-dish-amber {
+      background: radial-gradient(ellipse at 50% 35%, rgba(255, 255, 255, 0.38) 0%, rgba(245, 158, 11, 0.12) 70%, rgba(180, 60, 0, 0.35) 100%);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="mine-bg text-slate-100 min-h-screen flex flex-col items-center justify-between p-3 sm:p-6 select-none overflow-x-hidden">
+<!-- BEGIN: AmbientMineHeader -->
+<header class="w-full max-w-5xl mb-4" data-purpose="mine-telemetry-header"></header>
+<!-- END: AmbientMineHeader -->
+<!-- BEGIN: PhysicalControlBox -->
+<main class="w-full max-w-5xl relative mb-4" data-purpose="industrial-cabinet-container">
+<div class="enclosure-body rounded-3xl p-5 sm:p-8 border-4 border-orange-700/80 relative text-zinc-900 shadow-2xl transition-all duration-300">
+<div class="hex-bolt absolute top-4 left-4" title="Parafuso Selado M8"></div>
+<div class="hex-bolt absolute top-4 right-4" title="Parafuso Selado M8"></div>
+<div class="hex-bolt absolute bottom-4 left-4" title="Parafuso Selado M8"></div>
+<div class="hex-bolt absolute bottom-4 right-4" title="Parafuso Selado M8"></div>
+<div class="border-2 border-orange-800/40 rounded-2xl p-4 sm:p-6 bg-gradient-to-b from-orange-500/10 via-transparent to-black/20">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+<!-- PROTOCOL STEPS COLUMN (ETAPAS 1 A 5 RIGOROSAMENTE ALINHADAS) -->
+<section class="md:col-span-4 bg-black/15 rounded-xl p-3 sm:p-4 border border-orange-600/30 flex flex-col justify-between h-full" data-purpose="step-buttons-column">
+<div class="flex items-center justify-between pb-2 mb-2 border-b border-orange-600/40">
+<span class="text-xs font-black tracking-widest text-zinc-950 uppercase">ETAPAS DO PROTOCOLO</span>
+
+</div>
+<div class="space-y-2.5" id="step-buttons-list">
+          <div class="step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border-2 border-amber-400 bg-orange-950/80 shadow-lg shadow-amber-950/50 cursor-pointer min-h-[54px] transition-all" data-step="0">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gradient-to-br from-red-500 to-red-800 border-2 border-red-300 text-white shadow-md ring-2 ring-amber-400 animate-pulse flex-shrink-0">1</div>
+              <div class="min-w-0">
+                <div class="step-title font-bold text-xs tracking-wider uppercase text-amber-300 truncate">PORTA E VEDAÇÃO</div>
+                <div class="step-desc text-[10px] text-amber-400 font-mono-tech font-bold tracking-tight block truncate">EM ANDAMENTO // VEDAÇÃO</div>
+              </div>
+            </div>
+            <div class="step-led w-3.5 h-3.5 rounded-full bg-amber-400 led-glow-amber border border-white/80 flex-shrink-0"></div>
+          </div>
+        
+          <div class="step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/80 opacity-80 hover:opacity-100 cursor-pointer min-h-[54px] transition-all" data-step="1">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700 flex-shrink-0">2</div>
+              <div class="min-w-0">
+                <div class="step-title font-bold text-xs tracking-wider uppercase text-slate-300 truncate">LUZES E SIRENE</div>
+                <div class="step-desc text-[10px] text-slate-400 font-mono-tech tracking-tight block truncate">AGUARDANDO ATIVAÇÃO</div>
+              </div>
+            </div>
+            <div class="step-led w-3.5 h-3.5 rounded-full bg-zinc-800 border border-zinc-700/80 flex-shrink-0"></div>
+          </div>
+        
+          <div class="step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/80 opacity-80 hover:opacity-100 cursor-pointer min-h-[54px] transition-all" data-step="2">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700 flex-shrink-0">3</div>
+              <div class="min-w-0">
+                <div class="step-title font-bold text-xs tracking-wider uppercase text-slate-300 truncate">AR DA MINA (VÁLVULA)</div>
+                <div class="step-desc text-[10px] text-slate-400 font-mono-tech tracking-tight block truncate">AGUARDANDO ATIVAÇÃO</div>
+              </div>
+            </div>
+            <div class="step-led w-3.5 h-3.5 rounded-full bg-zinc-800 border border-zinc-700/80 flex-shrink-0"></div>
+          </div>
+        
+          <div class="step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/80 opacity-80 hover:opacity-100 cursor-pointer min-h-[54px] transition-all" data-step="3">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700 flex-shrink-0">4</div>
+              <div class="min-w-0">
+                <div class="step-title font-bold text-xs tracking-wider uppercase text-slate-300 truncate">MONITOR DE GASES</div>
+                <div class="step-desc text-[10px] text-slate-400 font-mono-tech tracking-tight block truncate">AGUARDANDO ATIVAÇÃO</div>
+              </div>
+            </div>
+            <div class="step-led w-3.5 h-3.5 rounded-full bg-zinc-800 border border-zinc-700/80 flex-shrink-0"></div>
+          </div>
+        
+          <div class="step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/80 opacity-80 hover:opacity-100 cursor-pointer min-h-[54px] transition-all" data-step="4">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700 flex-shrink-0">5</div>
+              <div class="min-w-0">
+                <div class="step-title font-bold text-xs tracking-wider uppercase text-slate-300 truncate">AR CONDICIONADO</div>
+                <div class="step-desc text-[10px] text-slate-400 font-mono-tech tracking-tight block truncate">AGUARDANDO ATIVAÇÃO</div>
+              </div>
+            </div>
+            <div class="step-led w-3.5 h-3.5 rounded-full bg-zinc-800 border border-zinc-700/80 flex-shrink-0"></div>
+          </div>
+        </div>
+</section>
+<!-- EMERGENCY MUSHROOM CENTERPIECE -->
+<section class="md:col-span-5 flex flex-col items-center justify-between bg-black/15 rounded-xl p-3 sm:p-5 border-2 border-orange-600/40 shadow-inner h-full text-center" data-purpose="massive-estop-centerpiece">
+<div class="w-full flex items-center justify-center gap-2 pb-1 border-b border-orange-600/30 mb-2">
+<span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" id="header-pulse-dot-1"></span>
+<span class="text-xs font-black tracking-widest text-zinc-950 uppercase" id="center-header-text">GUIA DE PROCEDIMENTOS</span>
+<span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" id="header-pulse-dot-2"></span>
+</div>
+<div class="my-auto py-2 flex flex-col items-center justify-center">
+<div class="relative w-56 h-56 sm:w-64 sm:h-64 rounded-full canary-collar flex items-center justify-center p-3 shadow-2xl border-4 border-zinc-900 ring-4 ring-black/40">
+<div class="w-full h-full rounded-full bg-amber-400 border-4 border-amber-500 flex items-center justify-center relative shadow-inner select-none">
+<button aria-label="Botão de Parada de Emergência Principal" class="mushroom-cap tactile-btn w-36 h-36 sm:w-40 sm:h-40 rounded-full border-4 border-red-900 flex flex-col items-center justify-center cursor-pointer active:scale-95 transition-all shadow-2xl group" id="btn-emergency" title="PRESSIONE PARA INICIAR O PROTOCOLO DE EMERGÊNCIA" type="button">
+
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- INSTRUCTIONS, BATTERY & SPEAKER COLUMN -->
+<section class="md:col-span-3 flex flex-col justify-between space-y-4 bg-black/10 rounded-xl p-3 border border-orange-600/30 h-full" data-purpose="instruction-and-speaker-column">
+<div class="bg-zinc-900/80 rounded-lg p-2.5 border border-zinc-700/70 shadow-inner flex items-center justify-between">
+<div class="text-center">
+<span class="block text-[9px] font-black tracking-widest text-zinc-400 uppercase mb-1">POWER</span>
+<div class="w-4 h-4 rounded-full bg-emerald-400 border border-emerald-300 led-glow-green mx-auto" id="power-led" title="Sistema Primário Operacional"></div>
+</div>
+<div class="text-center">
+<span class="block text-[9px] font-black tracking-widest text-zinc-400 uppercase mb-1">BATERIA</span>
+<div class="flex items-center gap-0.5 bg-zinc-950 p-1 rounded border border-zinc-800">
+<span class="h-2.5 w-2 rounded-sm bg-emerald-500"></span>
+<span class="h-2.5 w-2 rounded-sm bg-emerald-500"></span>
+<span class="h-2.5 w-2 rounded-sm bg-emerald-500"></span>
+<span class="h-2.5 w-2 rounded-sm bg-emerald-500"></span>
+<span class="h-2.5 w-2 rounded-sm bg-emerald-500"></span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<div class="canary-collar w-32 h-32 rounded-full p-2 flex items-center justify-center relative shadow-xl">
+<div class="w-full h-full rounded-full border-2 border-zinc-600/60 p-1 flex items-center justify-center bg-zinc-900/60">
+<button aria-label="Repetir Última Instrução" class="canary-button tactile-btn w-full h-full rounded-full border-2 border-yellow-300 flex flex-col items-center justify-center text-center p-2 cursor-pointer select-none" id="btn-repeat-instruction" type="button">
+<svg class="h-5 w-5 text-zinc-950 mb-0.5" fill="currentColor" viewBox="0 0 24 24">
+<path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4a2 2 0 00-2 2v5a2 2 0 002 2h2.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM17.5 12a5.5 5.5 0 00-2-4.24v8.48c1.19-.94 2-2.43 2-4.24zm2.5 0a7.978 7.978 0 00-2.83-6.14l-.7.71a7 7 0 010 10.86l.7.71A7.978 7.978 0 0020 12z"></path>
+</svg>
+<span class="text-[11px] font-black text-zinc-950 leading-tight uppercase tracking-tight">REPETIR<br>INSTRUÇÃO</span>
+</button>
+</div>
+</div>
+</div>
+<div class="speaker-grille rounded-xl p-2.5 border-2 border-zinc-500 relative shadow-md">
+<div class="w-2 h-2 rounded-full bg-zinc-700 border border-zinc-400 absolute top-1 left-1"></div>
+<div class="w-2 h-2 rounded-full bg-zinc-700 border border-zinc-400 absolute top-1 right-1"></div>
+<div class="w-2 h-2 rounded-full bg-zinc-700 border border-zinc-400 absolute bottom-1 left-1"></div>
+<div class="w-2 h-2 rounded-full bg-zinc-700 border border-zinc-400 absolute bottom-1 right-1"></div>
+<div class="py-1.5 px-3 space-y-1.5">
+<div class="speaker-slot h-1.5 w-full mx-auto"></div>
+<div class="speaker-slot h-1.5 w-4/5 mx-auto"></div>
+<div class="speaker-slot h-1.5 w-full mx-auto"></div>
+<div class="speaker-slot h-1.5 w-4/5 mx-auto"></div>
+</div>
+<div class="mt-1 text-center"></div>
+</div>
+</section>
+</div>
+<!-- FOOTER NAVIGATION DECK (ERGONÔMICO, CENTRALIZADO, COM ÍCONES TÁTEIS HUMANIZADOS) -->
+<section class="mt-5 bg-black/25 rounded-2xl p-3.5 sm:p-5 border-2 border-orange-600/40 shadow-inner flex flex-col gap-3.5" data-purpose="integrated-operator-deck">
+<div class="grid grid-cols-2 gap-4 sm:gap-6 items-stretch max-w-3xl mx-auto w-full">
+<!-- BOTÃO ANTERIOR (Silicone tátil macio, chevron duplo ergonômico) -->
+<button class="pill-btn-base pill-btn-dark py-4 sm:py-5 px-6 flex items-center justify-center gap-3 group text-slate-200 transition-all opacity-50 cursor-not-allowed w-full rounded-2xl shadow-xl border-2 border-slate-700/80" disabled="" id="btn-nav-prev" type="button">
+<div class="thumb-dish absolute inset-1 pointer-events-none opacity-70 rounded-xl"></div>
+<div class="relative z-10 w-8 h-8 rounded-full bg-slate-900/80 border border-slate-700/80 flex items-center justify-center flex-shrink-0 group-hover:border-amber-400/60 transition-colors shadow-inner">
+<svg class="h-4 w-4 text-slate-300 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"></path>
+</svg>
+</div>
+<span class="relative z-10 font-black tracking-wider text-sm sm:text-base uppercase drop-shadow font-chivo">ANTERIOR</span>
+</button>
+<!-- BOTÃO AVANÇAR (Verde vibrante de segurança industrial tátil com duplo chevron) -->
+<button class="pill-btn-base py-4 sm:py-5 px-6 flex items-center justify-center gap-3 group text-zinc-950 transition-all w-full rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-95 border-2 border-emerald-300 shadow-xl led-glow-green" id="btn-nav-next" type="button">
+<div class="thumb-dish absolute inset-1 pointer-events-none opacity-40 rounded-xl"></div>
+<span class="relative z-10 font-black tracking-wider text-sm sm:text-base uppercase drop-shadow font-chivo text-zinc-950" id="nav-next-text">AVANÇAR</span>
+<div class="relative z-10 w-8 h-8 rounded-full bg-zinc-950/20 border border-zinc-950/30 flex items-center justify-center flex-shrink-0 transition-transform group-hover:translate-x-0.5 shadow-inner">
+<svg class="h-4 w-4 text-zinc-950" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" viewBox="0 0 24 24">
+<path d="M13 7l5 5-5 5M6 7l5 5-5 5"></path>
+</svg>
+</div>
+</button>
+</div>
+<div class="pt-2 border-t border-orange-600/30 flex flex-wrap items-center justify-between text-[10px] text-zinc-950 font-mono-tech font-bold px-1">
+<span class="uppercase tracking-wider">ALIMENTAÇÃO: BATERIA SELADA 12V 45Ah // AUTONOMIA: 72H</span>
+
+</div>
+</section>
+</div>
+<div class="h-3 w-full rounded hazard-stripes mt-4 border border-zinc-800 shadow-inner"></div>
+</div>
+</main>
+<!-- END: PhysicalControlBox -->
+<!-- BEGIN: InteractiveAudioLogic -->
+<script data-purpose="audio-speech-and-events">
+    const protocolSteps = [
+      {
+        id: 1,
+        title: "PORTA E VEDAÇÃO",
+        badge: "1",
+        instruction: "Passo 1: Verifique e tranque a porta de entrada e vedação de neoprene.",
+        subtextPending: "AGUARDANDO ATIVAÇÃO",
+        subtextActive: "EM ANDAMENTO // VEDAÇÃO",
+        subtextDone: "CONCLUÍDO // SELADO"
+      },
+      {
+        id: 2,
+        title: "LUZES E SIRENE",
+        badge: "2",
+        instruction: "Passo 2: Ligue o interruptor de balizamento estroboscópico externo e arme a sirene.",
+        subtextPending: "AGUARDANDO ATIVAÇÃO",
+        subtextActive: "EM ANDAMENTO // BALIZAMENTO",
+        subtextDone: "CONCLUÍDO // BALIZAMENTO"
+      },
+      {
+        id: 3,
+        title: "AR DA MINA (VÁLVULA)",
+        badge: "3",
+        instruction: "Passo 3: Abra a válvula de ar comprimido da mina até atingir a pressão nominal.",
+        subtextPending: "AGUARDANDO ATIVAÇÃO",
+        subtextActive: "AGUARDANDO ABERTURA",
+        subtextDone: "CONCLUÍDO // PRESSURIZADO"
+      },
+      {
+        id: 4,
+        title: "MONITOR DE GASES",
+        badge: "4",
+        instruction: "Passo 4: Ligue o monitor multigás digital e confirme níveis seguros de Monóxido de Carbono e Oxigênio.",
+        subtextPending: "AGUARDANDO ATIVAÇÃO",
+        subtextActive: "AGUARDANDO CALIBRAÇÃO",
+        subtextDone: "CONCLUÍDO // NÍVEIS SEGUROS"
+      },
+      {
+        id: 5,
+        title: "AR CONDICIONADO",
+        badge: "5",
+        instruction: "Passo 5: Acione o sistema de refrigeração e climatização interna.",
+        subtextPending: "AGUARDANDO ATIVAÇÃO",
+        subtextActive: "AGUARDANDO ACIONAMENTO",
+        subtextDone: "CONCLUÍDO // CLIMATIZADO"
+      }
+    ];
+
+    // Initial state: Standby (-1 means system not yet triggered)
+    let currentStepIndex = -1;
+    let isPaused = false;
+
+    function stopSpeaking() {
+      if (window.AndroidBridge && typeof window.AndroidBridge.stop === "function") {
+        try { window.AndroidBridge.stop(); } catch(e) {}
+      }
+      if ("speechSynthesis" in window) {
+        stopSpeaking();
+      }
+    }
+
+    function speakText(text) {
+      stopSpeaking();
+      if (window.AndroidBridge && typeof window.AndroidBridge.speak === "function") {
+        try {
+          window.AndroidBridge.speak(text);
+          return;
+        } catch(e) {
+          console.warn("AndroidBridge error, fallback to Web Speech", e);
+        }
+      }
+      if ("speechSynthesis" in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "pt-BR";
+        utterance.rate = 0.95;
+        utterance.pitch = 1.0;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function playTactileClick(type = 'standard') {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'alarm') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(900, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(320, ctx.currentTime + 0.35);
+          gain.gain.setValueAtTime(0.35, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.36);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(type === 'yellow' ? 440 : (type === 'accent' ? 380 : 280), ctx.currentTime);
+          gain.gain.setValueAtTime(0.2, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.09);
+        }
+      } catch (e) {
+        // Audio context requires user interaction
+      }
+    }
+
+    function updateControlsState() {
+      const btnPrev = document.getElementById('btn-nav-prev');
+      const btnPause = document.getElementById('btn-nav-pause');
+      const navNextText = document.getElementById('nav-next-text');
+      const voiceDisplay = document.getElementById('system-voice-display');
+      const statusBadge = document.getElementById('steps-status-badge');
+      const emergencyBtn = document.getElementById('btn-emergency');
+      const emergencyBtnText = document.getElementById('emergency-btn-text');
+
+      if (currentStepIndex === -1) {
+        // Standby
+        if (btnPrev) {
+          btnPrev.classList.add('opacity-50', 'cursor-not-allowed');
+          btnPrev.disabled = true;
+        }
+        if (btnPause) {
+          btnPause.classList.add('opacity-50', 'cursor-not-allowed');
+          btnPause.disabled = true;
+        }
+        if (navNextText) navNextText.textContent = "INICIAR";
+        if (voiceDisplay) voiceDisplay.textContent = "CONSOLE EM ESPERA // AGUARDANDO ACIONAMENTO";
+        if (statusBadge) {
+          statusBadge.textContent = "STANDBY";
+          statusBadge.className = "text-[10px] font-mono-tech font-bold text-zinc-900 uppercase";
+        }
+        if (emergencyBtn) {
+          emergencyBtn.classList.add('emergency-beacon-pulse');
+        }
+        if (emergencyBtnText) {
+          emergencyBtnText.innerHTML = `EMERGÊNCIA<br><span class="text-[8px] sm:text-[9px] text-amber-200 tracking-normal block mt-0.5">PRESSIONE P/ INICIAR</span>`;
+        }
+      } else {
+        // System Active
+        if (btnPrev) {
+          if (currentStepIndex > 0) {
+            btnPrev.classList.remove('opacity-50', 'cursor-not-allowed');
+            btnPrev.disabled = false;
+          } else {
+            btnPrev.classList.add('opacity-50', 'cursor-not-allowed');
+            btnPrev.disabled = true;
+          }
+        }
+        if (btnPause) {
+          btnPause.classList.remove('opacity-50', 'cursor-not-allowed');
+          btnPause.disabled = false;
+        }
+        if (navNextText) {
+          navNextText.textContent = currentStepIndex >= protocolSteps.length - 1 ? "FINALIZAR" : "AVANÇAR";
+        }
+        if (voiceDisplay && protocolSteps[currentStepIndex]) {
+          voiceDisplay.textContent = `PASSO ${currentStepIndex + 1}: ${protocolSteps[currentStepIndex].title}`;
+        }
+        if (statusBadge) {
+          statusBadge.textContent = `PASSO ${currentStepIndex + 1} / 5`;
+          statusBadge.className = "text-[10px] font-mono-tech font-bold text-amber-950 uppercase bg-amber-400 px-1.5 py-0.5 rounded";
+        }
+        if (emergencyBtn) {
+          emergencyBtn.classList.remove('emergency-beacon-pulse');
+        }
+        if (emergencyBtnText) {
+          emergencyBtnText.innerHTML = `SISTEMA ATIVADO<br><span class="text-[8px] sm:text-[9px] text-emerald-200 tracking-normal block mt-0.5">PROTOCOLO INICIADO</span>`;
+        }
+      }
+    }
+
+    function renderSteps() {
+      const container = document.getElementById('step-buttons-list');
+      if (!container) return;
+
+      container.innerHTML = protocolSteps.map((step, idx) => {
+        const isCurrent = currentStepIndex !== -1 && idx === currentStepIndex;
+        const isDone = currentStepIndex !== -1 && idx < currentStepIndex;
+
+        let cardClasses = "";
+        let numClasses = "";
+        let titleClasses = "";
+        let subtextClasses = "";
+        let subtext = "";
+        let ledClasses = "";
+
+        if (isCurrent) {
+          cardClasses = "step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border-2 border-amber-400 bg-orange-950/80 shadow-lg shadow-amber-950/50 cursor-pointer min-h-[54px] transition-all";
+          numClasses = "step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gradient-to-br from-red-500 to-red-800 border-2 border-red-300 text-white shadow-md ring-2 ring-amber-400 animate-pulse flex-shrink-0";
+          titleClasses = "step-title font-bold text-xs tracking-wider uppercase text-amber-300 truncate";
+          subtextClasses = "step-desc text-[10px] text-amber-400 font-mono-tech font-bold tracking-tight block truncate";
+          subtext = step.subtextActive;
+          ledClasses = "step-led w-3.5 h-3.5 rounded-full bg-amber-400 led-glow-amber border border-white/80 flex-shrink-0";
+        } else if (isDone) {
+          cardClasses = "step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-zinc-700/60 bg-zinc-950/70 hover:bg-zinc-900/90 shadow-md cursor-pointer min-h-[54px] transition-all";
+          numClasses = "step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-gradient-to-br from-emerald-400 to-emerald-700 border-2 border-emerald-300 text-white shadow-md flex-shrink-0";
+          titleClasses = "step-title font-bold text-xs tracking-wider uppercase text-zinc-100 truncate";
+          subtextClasses = "step-desc text-[10px] text-emerald-400 font-mono-tech tracking-tight block truncate";
+          subtext = step.subtextDone;
+          ledClasses = "step-led w-3.5 h-3.5 rounded-full bg-emerald-400 led-glow-green border border-white/60 flex-shrink-0";
+        } else {
+          // Inactive / Pending (LED apagado/cinza)
+          cardClasses = "step-card flex items-center justify-between p-2.5 sm:p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/60 hover:bg-zinc-900/80 opacity-80 hover:opacity-100 cursor-pointer min-h-[54px] transition-all";
+          numClasses = "step-num w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs bg-slate-800 text-slate-400 border border-slate-700 flex-shrink-0";
+          titleClasses = "step-title font-bold text-xs tracking-wider uppercase text-slate-300 truncate";
+          subtextClasses = "step-desc text-[10px] text-slate-400 font-mono-tech tracking-tight block truncate";
+          subtext = step.subtextPending;
+          ledClasses = "step-led w-3.5 h-3.5 rounded-full bg-zinc-800 border border-zinc-700/80 flex-shrink-0";
+        }
+
+        return `
+          <div class="${cardClasses}" data-step="${idx}">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="${numClasses}">${step.badge}</div>
+              <div class="min-w-0">
+                <div class="${titleClasses}">${step.title}</div>
+                <div class="${subtextClasses}">${subtext}</div>
+              </div>
+            </div>
+            <div class="${ledClasses}"></div>
+          </div>
+        `;
+      }).join('');
+
+      // Click on card: starts or jumps to step
+      const renderedCards = container.querySelectorAll('.step-card');
+      renderedCards.forEach((card, index) => {
+        card.addEventListener('click', () => {
+          playTactileClick();
+          currentStepIndex = index;
+          updateControlsState();
+          renderSteps();
+          if (!isPaused) {
+            speakText(protocolSteps[currentStepIndex].instruction);
+          }
+        });
+      });
+
+      updateControlsState();
+    }
+
+    function activateSystemAndStartProtocol() {
+      playTactileClick('alarm');
+      currentStepIndex = 0; // Starts immediately at Step 1 (index 0)
+      renderSteps();
+      updateControlsState();
+      speakText(protocolSteps[0].instruction);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const btnRepeat = document.getElementById('btn-repeat-instruction');
+      const btnEmergency = document.getElementById('btn-emergency');
+      const btnNext = document.getElementById('btn-nav-next');
+      const btnPrev = document.getElementById('btn-nav-prev');
+      const btnPause = document.getElementById('btn-nav-pause');
+      const pauseText = document.getElementById('pause-text');
+      const pauseIcon = document.getElementById('pause-icon');
+
+      if (btnEmergency) {
+        btnEmergency.addEventListener('click', () => {
+          activateSystemAndStartProtocol();
+        });
+      }
+
+      if (btnRepeat) {
+        btnRepeat.addEventListener('click', () => {
+          playTactileClick('yellow');
+          if (currentStepIndex === -1) {
+            speakText("Sistema em espera. Pressione o botão vermelho de emergência para iniciar o protocolo de sobrevivência.");
+          } else {
+            speakText(protocolSteps[currentStepIndex].instruction);
+          }
+        });
+      }
+
+      if (btnNext) {
+        btnNext.addEventListener('click', () => {
+          playTactileClick('accent');
+          if (currentStepIndex === -1) {
+            activateSystemAndStartProtocol();
+            return;
+          }
+
+          if (currentStepIndex < protocolSteps.length - 1) {
+            currentStepIndex++;
+            renderSteps();
+            updateControlsState();
+            if (!isPaused) {
+              speakText(protocolSteps[currentStepIndex].instruction);
+            }
+          } else {
+            // Already at the last step
+            speakText("Todas as 5 etapas do protocolo de sobrevivência foram concluídas com sucesso. Mantenham-se abrigados e calmos.");
+            const voiceDisplay = document.getElementById('system-voice-display');
+            if (voiceDisplay) voiceDisplay.textContent = "PROTOCOLO COMPLETO // TODOS OS PASSOS CONCLUÍDOS";
+          }
+        });
+      }
+
+      if (btnPrev) {
+        btnPrev.addEventListener('click', () => {
+          if (currentStepIndex > 0) {
+            playTactileClick();
+            currentStepIndex--;
+            renderSteps();
+            updateControlsState();
+            if (!isPaused) {
+              speakText(protocolSteps[currentStepIndex].instruction);
+            }
+          }
+        });
+      }
+
+      if (btnPause) {
+        btnPause.addEventListener('click', () => {
+          if (currentStepIndex === -1) return;
+          playTactileClick();
+          isPaused = !isPaused;
+          if (isPaused) {
+            stopSpeaking();
+            if (pauseText) pauseText.textContent = "CONTINUAR [ ▶ ]";
+            if (pauseIcon) {
+              pauseIcon.innerHTML = `<svg class="h-3 w-3 text-emerald-400 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>`;
+            }
+          } else {
+            if (pauseText) pauseText.textContent = "PAUSAR [ || ]";
+            if (pauseIcon) {
+              pauseIcon.innerHTML = `<svg class="h-3 w-3 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path></svg>`;
+            }
+            speakText(protocolSteps[currentStepIndex].instruction);
+          }
+        });
+      }
+
+      // Initial render in STANDBY state (all steps pending)
+      renderSteps();
+    });
+  </script>
+<!-- END: InteractiveAudioLogic -->
+
+
+</body></html>
