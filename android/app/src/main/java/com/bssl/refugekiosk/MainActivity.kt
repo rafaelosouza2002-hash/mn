@@ -1,9 +1,15 @@
 package com.bssl.refugekiosk
 
 import android.annotation.SuppressLint
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
@@ -62,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
         }
 
-        // 6. Connect Native TTS Bridge
+        // 6. Connect Native TTS & Audio Bridge
         webAppInterface = WebAppInterface(this)
         webView.addJavascriptInterface(webAppInterface!!, "AndroidBridge")
 
@@ -70,17 +76,75 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("file:///android_asset/index.html")
 
         setContentView(webView)
+
+        // 8. Enforce LockTask / Kiosk Mode
+        enforceKioskLock()
     }
 
     override fun onResume() {
         super.onResume()
         setupImmersiveFullscreen()
+        enforceKioskLock()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
             setupImmersiveFullscreen()
+        } else {
+            // Block and collapse notification shade pull-down
+            val closeDialog = Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+            sendBroadcast(closeDialog)
+            try {
+                @SuppressLint("WrongConstant")
+                val statusBarService = getSystemService("statusbar")
+                val statusBarManager = Class.forName("android.app.StatusBarManager")
+                val collapse = statusBarManager.getMethod("collapsePanels")
+                collapse.invoke(statusBarService)
+            } catch (e: Exception) {
+                // Ignore if not accessible
+            }
+        }
+    }
+
+    // Intercept hardware keys: Back, Overview/Recent Apps ("quadradinho"), and Menu
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK ||
+            keyCode == KeyEvent.KEYCODE_APP_SWITCH ||
+            keyCode == KeyEvent.KEYCODE_MENU ||
+            keyCode == KeyEvent.KEYCODE_WINDOW) {
+            return true // Consume and block exiting
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode == KeyEvent.KEYCODE_APP_SWITCH ||
+            event.keyCode == KeyEvent.KEYCODE_BACK) {
+            return true // Consume and block recent apps
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
+    private fun enforceKioskLock() {
+        try {
+            val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+            val adminComponent = ComponentName(this, AdminReceiver::class.java)
+
+            if (dpm.isDeviceOwnerApp(packageName)) {
+                // Whitelist package for LockTask (pins silently with ZERO unpin option)
+                dpm.setLockTaskPackages(adminComponent, arrayOf(packageName))
+                // Disable status bar expansion completely
+                dpm.setStatusBarDisabled(adminComponent, true)
+                // Disable lock screen/keyguard
+                dpm.setKeyguardDisabled(adminComponent, true)
+                Log.i("RefugeKiosk", "Device Owner Kiosk Mode configured successfully")
+            }
+
+            // Start LockTask mode (disables Recent Apps / "quadradinho")
+            startLockTask()
+        } catch (e: Exception) {
+            Log.w("RefugeKiosk", "Kiosk lock enforcement note: ${e.message}")
         }
     }
 
