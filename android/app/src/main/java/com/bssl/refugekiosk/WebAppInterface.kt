@@ -10,13 +10,16 @@ import android.webkit.JavascriptInterface
 import java.io.File
 import java.util.Locale
 
+import androidx.appcompat.app.AppCompatActivity
+
 /**
  * JavaScript interface exposed to the WebView as "window.AndroidBridge".
  * Handles offline voice playback (via embedded audio assets & TTS)
  * and hidden telemetry recording for mining safety drill analysis.
  */
-class WebAppInterface(private val context: Context) : TextToSpeech.OnInitListener {
-    private var tts: TextToSpeech? = TextToSpeech(context, this)
+class WebAppInterface(private val activity: AppCompatActivity) : TextToSpeech.OnInitListener {
+    private val context: Context get() = activity
+    private var tts: TextToSpeech? = TextToSpeech(activity, this)
     private var isTtsReady = false
     private var mediaPlayer: MediaPlayer? = null
 
@@ -137,17 +140,26 @@ class WebAppInterface(private val context: Context) : TextToSpeech.OnInitListene
 
     /**
      * Opens native Android Bluetooth Pairing Settings so admin can connect speakers.
+     * Temporarily pauses LockTask so Android allows the Settings activity to open,
+     * which automatically re-locks into Kiosk Mode as soon as MainActivity resumes.
      */
     @JavascriptInterface
     fun openBluetoothSettings() {
-        try {
-            val intent = Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        activity.runOnUiThread {
+            try {
+                try {
+                    activity.stopLockTask()
+                } catch (e: Exception) {
+                    Log.w("RefugeKiosk", "stopLockTask exception: ${e.message}")
+                }
+                val intent = Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                activity.startActivity(intent)
+                Log.i("RefugeKiosk", "Opening Android Bluetooth Settings with LockTask paused")
+            } catch (e: Exception) {
+                Log.e("RefugeKiosk", "Failed to open Bluetooth settings", e)
             }
-            context.startActivity(intent)
-            Log.i("RefugeKiosk", "Opening Android Bluetooth Settings")
-        } catch (e: Exception) {
-            Log.e("RefugeKiosk", "Failed to open Bluetooth settings", e)
         }
     }
 
