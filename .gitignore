@@ -14,3 +14,4 @@ app/build/
 local.properties
 .idea/
 *.iml
+*.zip
