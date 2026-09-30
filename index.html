@@ -397,8 +397,9 @@
       <!-- Populated dynamically -->
     </div>
 
-    <div class="pt-3 border-t border-zinc-700 flex items-center justify-between">
+    <div class="pt-3 border-t border-zinc-700 flex items-center justify-between gap-2">
       <button id="btn-clear-telemetry" class="px-3 py-1.5 bg-red-950 hover:bg-red-900 border border-red-700 text-red-200 rounded text-xs font-bold">LIMPAR REGISTROS</button>
+      <button id="btn-open-bluetooth" class="px-3 py-1.5 bg-blue-900 hover:bg-blue-800 border border-blue-600 text-blue-100 rounded text-xs font-bold flex items-center gap-1">⚙️ BLUETOOTH</button>
       <span class="text-[10px] text-zinc-400">Puxe via ADB: adb pull /sdcard/kiosk_telemetry.jsonl</span>
     </div>
   </div>
@@ -835,6 +836,15 @@
             window.AndroidBridge.clearTelemetry();
           }
           openTelemetryModal();
+        });
+      }
+
+      const btnOpenBluetooth = document.getElementById('btn-open-bluetooth');
+      if (btnOpenBluetooth) {
+        btnOpenBluetooth.addEventListener('click', () => {
+          if (window.AndroidBridge && typeof window.AndroidBridge.openBluetoothSettings === 'function') {
+            window.AndroidBridge.openBluetoothSettings();
+          }
         });
       }
 

@@ -134,6 +134,22 @@ class WebAppInterface(private val context: Context) : TextToSpeech.OnInitListene
         }
     }
 
+    /**
+     * Opens native Android Bluetooth Pairing Settings so admin can connect speakers.
+     */
+    @JavascriptInterface
+    fun openBluetoothSettings() {
+        try {
+            val intent = Intent(android.provider.Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            Log.i("RefugeKiosk", "Opening Android Bluetooth Settings")
+        } catch (e: Exception) {
+            Log.e("RefugeKiosk", "Failed to open Bluetooth settings", e)
+        }
+    }
+
     fun shutdown() {
         stop()
         tts?.shutdown()
